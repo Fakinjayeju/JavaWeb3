@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+                stage('Clean old Artifact') {
+            steps {
+                sh"""
+                rm -rf target
+                """
+            }
+        }
         stage('Build') {
             steps {
                 sh"""
@@ -9,7 +16,8 @@ pipeline {
                 """
             }
         }
-            stage('Upload Artifact') {
+     
+               stage('Upload Artifact') {
             steps {
                 sh"""
                 cd target
