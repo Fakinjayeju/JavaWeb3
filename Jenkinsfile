@@ -23,7 +23,7 @@ pipeline {
                stage('Upload Artifact') {
             steps {
                 script {
-                    // find the WAR file 
+                    // Find the WAR file 
                     def artifactName = sh(script: "cd target && ls WebAppCal-*.war" , returnstdout: true).trim()
 
                     // set the artifact name as an environment variable
