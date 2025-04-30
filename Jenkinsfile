@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment{
+        BUCKET_NAME="project-1-bucket-a"
+    }
 
     stages {
                 stage('Clean old Artifact') {
@@ -19,17 +22,26 @@ pipeline {
      
                stage('Upload Artifact') {
             steps {
-                sh"""
-                cd target
-                aws s3 cp WebAppCal-*.war s3://project-1-bucket-a/
+                script {
+                    // find the WAR file 
+                    def artifactName = sh(script: "cd target && ls WebAppCal-*.war" , returnstdout: true).trim()
+
+                    // set the artifact name as an environment variable
+                    env.ARTIFACT_NAME = artifactName
+
+                    // upload it to s3
+                    sh """
+                    cd target
+                aws s3 cp ${artifactName} s3://${BUCKET_NAME}/
                 """
             }
         }
+
         stage('Deploy') {
             steps {
                 sh"""
                 cd ansible
-                ansible-playbook -i aws_ec2.yml playbook.yml
+                ansible-playbook -i aws_ec2.yml playbook.yml -e "BUCKET_NAME=${env.BUCKET_NAME} ARTIFACT_NAME=${env.ARTIFACT_NAME}"
                 """
             }
         }
